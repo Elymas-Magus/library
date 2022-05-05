@@ -24,9 +24,15 @@ const Users = db.define('users', {
         type: DataTypes.STRING,
         allowNull: false,
         require: true,
-    }
-});
+    },
+    roleId: {
+        type: DataTypes.BIGINT.UNSIGNED,
+        allowNull: false,
+        require: true,
+    },
+}, { paranoid: true });
 
-Roles.hasMany(Users);
+Roles.hasMany(Users, { foreignKey: 'roleId' });
+Users.belongsTo(Roles);
 
 module.exports = Users;

@@ -6,7 +6,7 @@ require('dotenv').config();
 const app = express();
 
 // Connection
-const conn = require('./db/conn');
+// const conn = require('./db/conn');
 
 // Import Routes
 const apiRoutes = require('./routes/api');

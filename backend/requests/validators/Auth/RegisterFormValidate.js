@@ -13,6 +13,7 @@ class RegisterFormValidate extends FormValidate {
             email: { require: true, type: 'string' },
             password: { require: true, type: 'string' },
             password_confirm: { require: true, type: 'string' },
+            roleId: { require: true, type: 'number' },
         };
     }
 }

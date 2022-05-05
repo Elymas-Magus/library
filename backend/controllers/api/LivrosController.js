@@ -3,7 +3,8 @@ const FormInputError = require('../../exceptions/FormInputError');
 const LivroAutor = require('../../models/LivroAutor');
 const LivroEditora = require('../../models/LivroEditora');
 const Livros = require('../../models/Livros');
-const LivroStoreFormValidate = require('../../services/validators/Livros/LivroStoreFormValidate');
+const LivroStoreFormValidate = require('../../requests/validators/Livros/LivroStoreFormValidate');
+const DbService = require('../../services/DbService');
 const Controller = require('../controller');
 
 
@@ -39,7 +40,7 @@ module.exports = class LivrosController extends Controller {
     }
     static async store(req, res) {
         try {
-            const validator = LivroStoreFormValidate.getInstance(req.body);
+            const validator = new LivroStoreFormValidate(req);
             const sanitized = validator.getSanitized();
 
             const {
@@ -76,8 +77,10 @@ module.exports = class LivrosController extends Controller {
     }
     static async update(req, res) {
         try {
-            const validator = LivroStoreFormValidate.getInstance(req.body);
+            const validator = new LivroStoreFormValidate(req);
             const sanitized = validator.getSanitized();
+
+            console.log(sanitized);
 
             const {
                 title,
@@ -92,16 +95,17 @@ module.exports = class LivrosController extends Controller {
                 throw new AccessException("Você não tem acesso!");
             }
 
-            livro.updateAttributes({
+            DbService.update(livro, {
                 title,
                 bookAuthorId,
                 bookPublisherId,
-                userId: req.user.id,
             });
+            
+            const livroAtualizado = await livro.save();
 
             res.status(200).json({
-                message: 'livro cadastrado com sucesso',
-                livro: newLivro,
+                message: 'livro atualizado com sucesso',
+                livro: livroAtualizado,
             })
         } catch (error) {
             if (error instanceof FormInputError) {
@@ -114,7 +118,7 @@ module.exports = class LivrosController extends Controller {
                 });
             } else {
                 res.status(500).json({
-                    message: error,
+                    message: error.message,
                 });
             } 
             return;            
@@ -144,6 +148,34 @@ module.exports = class LivrosController extends Controller {
         }
     }
     static async destroy(req, res) {
-        
+        try {
+            const livroId = req.params.id;
+            const livro = await Livros.findByPk(livroId);
+
+            if (livro.userId != req.user.id) {
+                throw new AccessException("Você não tem acesso!");
+            }
+
+            livro.destroy();
+
+            res.status(200).json({
+                message: 'livro deletado com sucesso',
+            })
+        } catch (error) {
+            if (error instanceof FormInputError) {
+                res.status(422).json({
+                    message: error.message,
+                });
+            } else if (error instanceof AccessException) {
+                res.status(403).json({
+                    message: error.message,
+                });
+            } else {
+                res.status(500).json({
+                    message: error.message,
+                });
+            } 
+            return;            
+        }
     }
 }

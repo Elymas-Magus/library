@@ -22,8 +22,8 @@ const LivroAutor = db.define('book_authors', {
     createdBy: {
         type: DataTypes.BIGINT.UNSIGNED,
         allowNull: false,
-    }
-});
+    },
+}, { paranoid: true });
 
 User.hasOne(LivroAutor, { foreignKey: 'createdBy' });
 

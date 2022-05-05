@@ -1,19 +1,22 @@
 const bcrypt = require('bcrypt');
 
 const User = require('../../models/Users');
-const LoginFormValidate = require('../../services/validators/Auth/LoginFormValidate');
-const RegisterFormValidate = require('../../services/validators/Auth/RegisterFormValidate');
+const LoginFormValidate = require('../../requests/validators/Auth/LoginFormValidate');
+const RegisterFormValidate = require('../../requests/validators/Auth/RegisterFormValidate');
 const FormInputError = require('../../exceptions/FormInputError');
+const NotFoundException = require('../../exceptions/NotFoundException');
 
 const createUserToken = require('../../helpers/create-user-token');
 const auth = require('../../helpers/auth');
 const Controller = require('../controller');
+const DbService = require('../../services/DbService');
+const getToken = require("../../helpers/get-token");
 
 
 module.exports = class AuthController extends Controller {
     static async login(req, res) {
         try {
-            const validator = LoginFormValidate.getInstance(req.body);
+            const validator = new LoginFormValidate(req);
             const sanitized = validator.getSanitized();
 
             const {
@@ -26,7 +29,7 @@ module.exports = class AuthController extends Controller {
             );
 
             if (!user) {
-                throw new Error(
+                throw new NotFoundException(
                     "Usuário inexistente!"
                 );
             }
@@ -47,6 +50,10 @@ module.exports = class AuthController extends Controller {
                 res.status(422).json({
                     message: error.message,
                 });
+            } if (error instanceof NotFoundException) {
+                res.status(404).json({
+                    message: error.message,
+                });
             } else {
                 res.status(500).json({
                     message: error.message,
@@ -57,13 +64,14 @@ module.exports = class AuthController extends Controller {
     }
     static async register(req, res) {
         try {
-            const validator = RegisterFormValidate.getInstance(req.body);
+            const validator = new RegisterFormValidate(req.body);
             const sanitized = validator.getSanitized();
 
             const {
                 name,
                 email,
-                password
+                password,
+                roleId,
             } = sanitized;
             
             const existentUser = await User.findOne(
@@ -84,6 +92,7 @@ module.exports = class AuthController extends Controller {
                 name,
                 email,
                 password: passwordHash,
+                roleId,
             });
 
             const newUser = await user.save();
@@ -103,23 +112,69 @@ module.exports = class AuthController extends Controller {
         }
     }
     static async update(req, res) {
-        
+        try {
+            const validator = new RegisterFormValidate(req.body);
+            const sanitized = validator.getSanitized();
+
+            const {
+                name,
+                email,
+                password,
+                roleId,
+            } = sanitized;
+            const user = req.user;
+            
+            const saltRounds = 12;
+            const salt = bcrypt.genSaltSync(saltRounds);
+            const passwordHash = bcrypt.hashSync(password, salt);
+
+            DbService.update(user, {
+                name,
+                email,
+                password: passwordHash,
+                roleId,
+            });
+
+            const newUser = await user.save();
+
+            createUserToken(newUser, req, res);
+        } catch (error) {
+            if (error instanceof FormInputError) {
+                res.status(422).json({
+                    message: error.message,
+                });
+            } else {
+                res.status(500).json({
+                    message: error,
+                });
+            } 
+            return;            
+        }
     }
     static async validate(req, res) {
-        const currentUser = await auth(req);
+        try {
+            if (!getToken(req)) {
+                throw new Error("Acesso negado")
+            }
+            const currentUser = await auth(req);
+    
+            if (!currentUser) {
+                throw new Error("Acesso negado");
+            }
 
-        res.status(currentUser ? 200 : 401)
-            .send(currentUser);
+            res.status(200).send(currentUser);
+        } catch (error) {
+            res.status(401).send(error.message);
+        }
     }
     static async refresh(req, res) {
-        console.log(req.user);
-        res.status(req.user ? 200 : 401)
-            .send(req.user);
+        createUserToken(req.user, req, res);
     }
     static async logout(req, res) {
         const currentUser = await auth(req);
 
-        res.status(currentUser ? 200 : 401)
-            .send(currentUser);
+        res.status(currentUser ? 200 : 401).json({
+            message: "deslogado com sucesso!",
+        });
     }
 }

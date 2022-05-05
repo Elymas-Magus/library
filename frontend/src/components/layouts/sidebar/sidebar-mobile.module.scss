@@ -1,0 +1,153 @@
+@media (max-width: 600px) {
+    .toggle-container {
+        display: flex;
+        margin-left: 10px !important;
+        margin-top: 10px !important;
+    }
+    .icon {
+        width: 34px;
+        height: 34px;
+    }
+    .main-sidebar {
+        padding: 0 !important;
+        margin: 0 !important;
+    
+        .sidebar {
+            width: 0 !important;
+            display: none;
+            
+            $this: &;
+            &:not(#{$this}--open) {
+                .sidebar-item {
+                    .sidebar-item--icon {
+                        display: none;
+                    }
+                    .sidebar-item--title {
+                        display: none;
+                    }
+                }
+                .navbrand {
+                    display: none;
+                }
+                .sidebar-footer {
+                    display: none;
+                }
+                .navbrand--without-avatar, .navbrand--user {
+                    display: none;
+                }
+            }
+    
+            &--open {
+                width: 420px !important;
+                max-width: 90% !important;
+                border-radius: 0 20px 20px 0;
+    
+                .navbrand {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    margin-top: 25px;
+                    margin-right: 20px;
+        
+                    .text-logo {
+                        display: block;
+                        margin-left: 12px;
+                    }
+
+                    .sociallplay-logo {
+                        width: 42px;
+                        height: 67px;
+                        margin-top: 63px !important;
+                        margin-bottom: 63px !important;
+                        background-color: transparent;
+                    }
+                }
+    
+                .navbrand--without-avatar, .navbrand--user {
+                    margin-right: 16px;
+                    border: {
+                        top: {
+                            left-radius: 0;
+                            right-radius: 19px;
+                        };
+                        bottom: {
+                            left-radius: 0;
+                            right-radius: 19px;
+                        }
+                    };
+                }
+    
+                .sidebar-item {
+                    height: 66px;
+                    width: 100%;
+        
+                    .sidebar-item--icon {
+                        justify-content: flex-start;
+                    }
+                }
+    
+                .sidebar-button-group {
+                    display: flex;
+                    justify-content: flex-start;
+                    align-items: center;
+                }
+    
+                .sidebar-item {
+                    div.sidebar-item--icon {
+                        transition: margin .5s;
+                    }
+    
+                    div.sidebar-item--icon {
+                        margin-left: 73px;
+                    }
+    
+                    div.sidebar-item--title {
+                        margin-left: 15px;
+                    }
+    
+                    a.sidebar-item--title {
+                        color: white;
+                        text-decoration: none;
+                        font: normal normal normal 18px/27px Helvetica;
+                        letter-spacing: 0px;
+                        color: #FFFFFF;
+                        opacity: 1;
+                    }
+                }
+    
+                .sidebar-item:not(.active) {
+                    div.sidebar-item--icon {
+                        margin-left: 86px;
+                    }
+                }
+    
+                .sidebar-item.active {
+                    &::before {
+                        content: "";
+                        width: 13px;
+                        height: 100%;
+                        background-color: white;
+                        border-radius: 0 20px 20px 0;
+                    }
+        
+                    &::after {
+                        content: "";
+                        margin-left: auto!important;
+                    }
+                }
+    
+                .sidebar-footer {
+                    display: none;
+                }
+            }        
+        }
+    
+        .sidebar:not(.sidebar--open) {
+            .sidebar-button-group {
+                div.sidebar-item--title {
+                    display: none;
+                }
+            }        
+        }
+    }
+}

@@ -1,6 +1,6 @@
 const FormInputError = require('../../exceptions/FormInputError');
 const LivroEditora = require('../../models/LivroEditora');
-const LivroEditoraStoreFormValidate = require('../../services/validators/Editoras/LivroEditoraStoreFormValidate');
+const LivroEditoraStoreFormValidate = require('../../requests/validators/Editoras/LivroEditoraStoreFormValidate');
 const Controller = require('../controller');
 
 
@@ -22,7 +22,7 @@ module.exports = class LivrosEditoraController extends Controller {
     }
     static async store(req, res) {
         try {
-            const validator = LivroEditoraStoreFormValidate.getInstance(req.body);
+            const validator = new LivroEditoraStoreFormValidate(req);
             const sanitized = validator.getSanitized();
 
             const { name } = sanitized;

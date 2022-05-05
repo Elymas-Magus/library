@@ -7,7 +7,7 @@ class FormValidate {
     _instance;
 
     constructor(req) {
-        this.#req = req;
+        this.#req = req.body;
     }
     static getInstance(req) {
         if (!this._instance) {

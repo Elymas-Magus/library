@@ -31,8 +31,8 @@ const Livros = db.define('books', {
         type: DataTypes.BIGINT.UNSIGNED,
         allowNull: false,
         require: true,
-    }
-});
+    },
+}, { paranoid: true });
 
 Livros.belongsTo(User);
 User.hasMany(Livros, { foreignKey: 'userId' });
